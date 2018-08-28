@@ -1,0 +1,5 @@
+#pragma once
+#include <eosio/testing/tester.hpp>
+
+static std::vector<uint8_t> tokendapppub_wasm() { return read_wasm("${CMAKE_BINARY_DIR}/../tokendapppub.wasm"); }
+static std::vector<char>    tokendapppub_abi() { return read_abi("${CMAKE_BINARY_DIR}/../tokendapppub.abi"); }

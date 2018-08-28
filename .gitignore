@@ -1,0 +1,4 @@
+.idea
+.vscode
+build
+tests/eosio.contracts
