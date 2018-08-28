@@ -147,6 +147,7 @@ void tokendapppub::transfer(account_name from, account_name to, asset quantity, 
     tb_players from_player(_self, from);
     auto player_itr = from_player.find(quantity.symbol.name());
     eosio_assert(player_itr != from_player.end(), "no balance object found by from account");
+    eosio_assert(player_itr->balance.amount >= quantity.amount, "overdrawn balance" );
     from_player.modify(player_itr, from, [&](auto& rt){
         rt.balance -= quantity;
     });
