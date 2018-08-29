@@ -71,7 +71,8 @@ void tokendapppub::sell(account_name from, asset quantity) {
     eosio_assert((quantity.amount > 0) && (quantity.amount <= player_itr->balance.amount), "invalid amount");
     eosio_assert(quantity.symbol == player_itr->balance.symbol, "symbol precision mismatch");
 
-    asset eos_quantity = game_sell(quantity.symbol.name(), quantity.amount);
+    asset eos_quantity, all_quantity;
+    tie(eos_quantity, all_quantity) = game_sell(quantity.symbol.name(), quantity.amount);
     eosio_assert(eos_quantity.amount > 0, "selled eos amount should be greater than 0");
 
     action(
@@ -93,7 +94,7 @@ void tokendapppub::sell(account_name from, asset quantity) {
             permission_level{_self, N(active)},
             _self,
             N(receipt),
-            make_tuple(from, string("sell"), quantity, eos_quantity)
+            make_tuple(from, string("sell"), quantity, all_quantity)
     ).send();
 }
 

@@ -188,15 +188,17 @@ private:
 
             eos -= eos_amount;
             stake += stake_amount;
+            _check();
+            return eos_amount;
+        }
 
+        int64_t fee(int64_t eos_amount) {
             int64_t fee = 0;
             int64_t fee_percent = _fee_percent();
             if (fee_percent > 0 && stake < base_stake) {
                 fee = (eos_amount * fee_percent + 99) / 100;
-                profit(fee);
             }
-            _check();
-            return eos_amount - fee;
+            return fee;
         }
 
         int64_t claim() {
@@ -261,7 +263,7 @@ private:
         return asset(stake_amount, game.symbol);
     }
 
-    asset game_sell(symbol_name name, int64_t stake_amount) {
+    tuple<asset, asset> game_sell(symbol_name name, int64_t stake_amount) {
         eosio_assert(stake_amount > 0, "stake amount should be bigger than 0");
 
         tb_games game_sgt(_self, name);
@@ -270,12 +272,20 @@ private:
         st_game game = game_sgt.get();
 
         int64_t eos_amount = game.sell(stake_amount);
+        eosio_assert(eos_amount > 0, "must reserve a positive amount");
 
-        eosio_assert(eos_amount > 0, "eos amount should be bigger than 0");
+        int64_t eos_fee = game.fee(eos_amount);
+        eosio_assert(eos_fee >= 0, "fee amount must be a Non-negative");
+        if (eos_fee > 0) {
+            game.profit(eos_fee);
+        }
+
+        int64_t reserve_amount = eos_amount - eos_fee;
+        eosio_assert(reserve_amount > 0, "must reserve a positive amount");
 
         game_sgt.set(game, game.owner);
 
-        return asset(eos_amount, CORE_SYMBOL);
+        return make_tuple(asset(reserve_amount, CORE_SYMBOL), asset(eos_amount, CORE_SYMBOL));
     }
 
     asset game_claim(symbol_name name) {
