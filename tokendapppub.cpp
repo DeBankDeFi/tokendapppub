@@ -1,5 +1,21 @@
 #include "tokendapppub.hpp"
 
+void tokendapppub::reg(account_name from, string memo) {
+    eosio_assert(memo.length() <= 7, "invalid memo format");
+    symbol_name name = string_to_symbol(0, memo.c_str()) >> 8;
+    
+    tb_games game_sgt(_self, name);
+    eosio_assert(game_sgt.exists(), "token not found by this symbol name");
+
+    tb_players from_player(_self, from);
+    auto player_itr = from_player.find(name);
+    if (player_itr == from_player.end()) {
+        from_player.emplace(from, [&](auto& rt){
+            rt.balance = asset(0, game_sgt.get().symbol);
+        });
+    }
+}
+
 void tokendapppub::buy(account_name from, account_name to, asset quantity, string memo) {
     if (from == _self || to != _self) {
         return;
@@ -55,7 +71,7 @@ void tokendapppub::sell(account_name from, asset quantity) {
     eosio_assert(quantity.symbol == player_itr->balance.symbol, "symbol precision mismatch");
 
     asset eos_quantity = game_sell(quantity.symbol.name(), quantity.amount);
-    eosio_assert(eos_quantity.amount > 0, "eos amount should be greater than 0");
+    eosio_assert(eos_quantity.amount > 0, "selled eos amount should be greater than 0");
 
     action(
             permission_level{_self, N(active)},
@@ -211,7 +227,7 @@ extern "C" {
         if (code != receiver) return;
 
         switch (action) {
-            EOSIO_API(tokendapppub, (receipt)(transfer)(sell)(consume)(destroy)(claim)(newtoken)(hellodapppub))
+            EOSIO_API(tokendapppub, (reg)(receipt)(transfer)(sell)(consume)(destroy)(claim)(newtoken)(hellodapppub))
         };
         eosio_exit(0);
     }

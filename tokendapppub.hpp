@@ -26,6 +26,7 @@ public:
     tokendapppub(account_name self):
             contract(self)
     {};
+    void reg(account_name from, string memo);
     void buy(account_name from, account_name to, asset quantity, string memo);
     void sell(account_name from, asset quantity);
     void consume(account_name from, asset quantity, string memo);
@@ -327,5 +328,5 @@ private:
 };
 
 #ifdef ABIGEN
-    EOSIO_ABI(tokendapppub, (receipt)(transfer)(sell)(consume)(destroy)(claim)(newtoken)(hellodapppub))
+    EOSIO_ABI(tokendapppub, (reg)(receipt)(transfer)(sell)(consume)(destroy)(claim)(newtoken)(hellodapppub))
 #endif
