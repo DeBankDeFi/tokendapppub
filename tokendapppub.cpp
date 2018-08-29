@@ -50,7 +50,7 @@ void tokendapppub::sell(account_name from, asset quantity) {
     require_auth(from);
     tb_players from_player(_self, from);
     auto player_itr = from_player.find(quantity.symbol.name());
-    eosio_assert(player_itr != from_player.end(), "player not found");
+    eosio_assert(player_itr != from_player.end(), "account not found");
     eosio_assert((quantity.amount > 0) && (quantity.amount <= player_itr->balance.amount), "invalid amount");
     eosio_assert(quantity.symbol == player_itr->balance.symbol, "symbol precision mismatch");
 
