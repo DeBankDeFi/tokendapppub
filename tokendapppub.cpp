@@ -1,6 +1,7 @@
 #include "tokendapppub.hpp"
 
 void tokendapppub::reg(account_name from, string memo) {
+    require_auth(from);
     eosio_assert(memo.length() <= 7, "invalid memo format");
     symbol_name name = string_to_symbol(0, memo.c_str()) >> 8;
     
