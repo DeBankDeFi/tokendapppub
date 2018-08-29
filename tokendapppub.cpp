@@ -59,7 +59,7 @@ void tokendapppub::buy(account_name from, account_name to, asset quantity, strin
             permission_level{_self, N(active)},
             _self,
             N(receipt),
-            make_tuple(from, string("buy"), quantity, stake_quantity)
+            make_tuple(from, string("buy"), quantity, stake_quantity, asset())
     ).send();
 }
 
@@ -94,7 +94,7 @@ void tokendapppub::sell(account_name from, asset quantity) {
             permission_level{_self, N(active)},
             _self,
             N(receipt),
-            make_tuple(from, string("sell"), quantity, all_quantity)
+            make_tuple(from, string("sell"), quantity, all_quantity, all_quantity-eos_quantity)
     ).send();
 }
 
@@ -213,7 +213,7 @@ void tokendapppub::newtoken(account_name from, asset base_eos_quantity, asset ma
     new_game(from, base_eos_quantity, maximum_stake, option_quantity, lock_up_period, base_fee_percent, init_fee_percent);
 }
 
-void tokendapppub::receipt(account_name from, string type, asset in, asset out) {
+void tokendapppub::receipt(account_name from, string type, asset in, asset out, asset fee) {
     require_auth(_self);
 }
 

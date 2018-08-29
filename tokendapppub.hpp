@@ -38,7 +38,7 @@ public:
                   uint32_t lock_up_period,
                   uint8_t base_fee_percent, uint8_t init_fee_percent);
     void transfer(account_name from, account_name to, asset quantity, string memo);
-    void receipt(account_name from, string type, asset in, asset out);
+    void receipt(account_name from, string type, asset in, asset out, asset fee);
 private:
     symbol_name _string_to_symbol_name(const char* str) {
         return string_to_symbol(0, str) >> 8;
