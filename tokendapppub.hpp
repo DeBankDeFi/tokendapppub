@@ -220,9 +220,9 @@ private:
         tb_games game_sgt(_self, symbol.name());
         eosio_assert(!game_sgt.exists(), "game has started before");
         eosio_assert(base_eos_quantity.symbol == CORE_SYMBOL, "base_eos must be core token");
-        eosio_assert((base_eos_quantity.amount > 0) && (base_eos_quantity.amount <= 1000000000ll*10000), "invalid amount of base_eos");
+        eosio_assert((base_eos_quantity.amount > 0) && (base_eos_quantity.amount <= 1000000000ll*10000), "invalid amount of base EOS pool");
         eosio_assert(maximum_stake.is_valid(), "invalid maximum stake");
-        eosio_assert((maximum_stake.amount > 0) && (maximum_stake.amount <= 10000000000000ll*10000), "invalid amount of maximum stake");
+        eosio_assert((maximum_stake.amount > 0) && (maximum_stake.amount <= 10000000000000ll*10000), "invalid amount of maximum supply");
         eosio_assert((option_quantity.amount >= 0) && (option_quantity.amount <= maximum_stake.amount), "invalid amount of option");
         eosio_assert(lock_up_period <= MAX_PERIOD, "invalid lock up period");
         eosio_assert((base_fee_percent >= 0) && (base_fee_percent <= 99), "invalid fee percent");
