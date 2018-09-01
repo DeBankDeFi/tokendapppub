@@ -1,4 +1,4 @@
-# **Utility Token Whitepaper**
+# **Bancor based utility-enhanced token protocol**
 
 As a series of mainnets for high TPS  blockchain infrastructure are being implemented in 2018, DApp development is becoming more and more popular recently. However, there is no corresponding industry standard for these DApp utility tokens so far. In this whitepaper, we purpose a kind of new utility token that helps DApp developers design and issue their own utility tokens.
 
@@ -11,19 +11,12 @@ In view of the various problems caused by the strong token liquidity, we believe
 
 The core of the Bancor-based token protocol is to consume the tokens held by users and return them to the current token pool. Meanwhile, since the benchmark currency at the other end of the Bancor protocol remains the same, it will increase the value of this utility token for those token holders. The corresponding recursion formulas are as follows:
 $$
-baseCurrencyAmount'=\frac{(baseCurrencyAmount-baseCurrencyReserve)\times utilityTokenTotalSupply}{utilityTokenTotalSupply-utiltyTokenRemainings+utilityTokenConsumption}
+\begin{align}
+baseCurrencyAmount'&=\frac{(baseCurrencyAmount-baseCurrencyReserve)\times utilityTokenTotalSupply}{utilityTokenTotalSupply-utiltyTokenRemainings-utilityTokenConsumption}\\
+baseCurrencyReserve'&=\frac{(baseCurrencyAmount-baseCurrencyReserve)\times (utilityTokenRemainings+UtilityTokenConsumption)}{UtilityTokenTotalSupply-utilityTokenRemainings-utilityTokenConsumption}\\
+utilituTokenRemainings'&=utilityTokenRemainings+utilityTokenConsumption
+\end{align}
 $$
-
-$$
-baseCurrencyReserve'=\frac{(baseCurrencyAmount-baseCurrencyReserve)\times (utilityTokenRemainings+UtilityTokenConsumption)}{UtilityTokenTotalSupply-utilityTokenRemainings+utilityTokenConsumption}
-$$
-
-
-$$
-utilituTokenRemainings'=utilityTokenRemainings+utilityTokenConsumption
-$$
-
-
 
 ### 2. Token dividend protocol
 
@@ -31,14 +24,9 @@ The core of the Bancor-based token dividend protocol is to increase the amount o
 
 
 $$
-baseCurrencyAmount'=\frac{(baseCurrencyAmount-baseCurrencyReserve+baseCurrencyDividends)\times utilityTokenTotalSupply}{utilityTokenTotalSupply-utilityTokenRemainings}
-$$
-
-$$
+baseCurrencyAmount'=\frac{(baseCurrencyAmount-baseCurrencyReserve+baseCurrencyDividends)\times utilityTokenTotalSupply}{utilityTokenTotalSupply-utilityTokenRemainings}\\
 baseCurrencyReserve'=\frac{(baseCurrencyAmount-baseCurrencyReserve+baseCUrrencyDividends)\times utilityTokenRemainings}{utilityTokenTotalSupply-utilityTokenRemainings}
 $$
-
-
 
 ### 3. Token option protocol
 
@@ -51,23 +39,15 @@ $$
 utilityTokenReleasedOptionAmount'=\frac{(currentTime-utilityTokenIssuedTime)\times utilityTokenOptionTotalSupply}{utilityTokenOptionLockupPeriod}
 $$
 
-
-
 The option release process is equivalent to the new token distribution process, and the newly issued utility tokens are authorized to the DApp project team in the mean time. It is necessary to keep the Bancor trading protocol smooth running all the time especially when the new tokens are released.  In the EOS RAM extension model, there is a problem that large amount of EOS will be locked in the smart contract eventually. Even RAM holder sell all their RAM, they can not get their locked EOS back from the contract. In this new model, this problem could be avoided so as to protect the token holders' interests. The corresponding formulas are as follows:
 
 $$
-baseCurrencyAmount'=\frac{(baseCurrencyAmount-baseCurrencyReserve)\times (utilityTokenReleasedOptionAmount+utilityTokenTotalSupply)}{utilityTokenTotalSupply-utilityTokenRemainings+utilityTokenReleasedOptionAmount}
+\begin{align}
+baseCurrencyAmount'&=\frac{(baseCurrencyAmount-baseCurrencyReserve)\times (utilityTokenReleasedOptionAmount+utilityTokenTotalSupply)}{utilityTokenTotalSupply-utilityTokenRemainings+utilityTokenReleasedOptionAmount}\\
+baseCurrencyReserve'&=\frac{(baseCurrencyAmount-baseCurrencyReserve)\times utilityTokenRemainings}{utilityTokenTotalSupply-utilityTokenRemainings+utilityTokenReleasedOptionAmount}\\
+utilityTokenTotalSupply'&=utilityTokenTotalSupply+utilityTokenReleasedOptionAmount
+\end{align}
 $$
-
-$$
-baseCurrencyReserve'=\frac{(baseCurrencyAmount-baseCurrencyReserve)\times utilityTokenRemainings}{utilityTokenTotalSupply-utilityTokenRemainings+utilityTokenReleasedOptionAmount}
-$$
-
-$$
-utilityTokenTotalSupply'=utilityTokenTotalSupply+utilityTokenReleasedOptionAmount
-$$
-
-
 
 ### 4. Token trading fee
 
