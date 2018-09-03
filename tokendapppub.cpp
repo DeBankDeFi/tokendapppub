@@ -1,5 +1,53 @@
 #include "tokendapppub.hpp"
 
+void tokendapppub::create(account_name issuer, asset maximum_supply) {
+    require_auth(issuer);
+    
+    auto sym = maximum_supply.symbol;
+    eosio_assert( sym.is_valid(), "invalid symbol name" );
+    eosio_assert( maximum_supply.is_valid(), "invalid supply");
+    eosio_assert( maximum_supply.amount > 0, "max-supply must be positive");
+
+    tb_games game_sgt(_self, sym.name());
+    eosio_assert(game_sgt.exists(), "game not found by this symbol name");
+    st_game game = game_sgt.get();
+    eosio_assert(game.owner == issuer, "issuer is not the owner of this token");
+    eosio_assert(game.base_stake - game.deserved_option + game.base_option == maximum_supply.amount, "invalid maximum supply");
+
+    stats statstable(_self, sym.name());
+    auto existing = statstable.find(sym.name());
+    eosio_assert(existing == statstable.end(), "token with symbol already exists" );
+
+    statstable.emplace(issuer, [&]( auto& s) {
+        s.supply.symbol = maximum_supply.symbol;
+        s.max_supply = maximum_supply;
+        s.issuer = issuer;
+    });
+}
+
+void tokendapppub::issue(account_name to, asset quantity, string memo) {
+    auto sym = quantity.symbol;
+    eosio_assert( sym.is_valid(), "invalid symbol name" );
+    eosio_assert( memo.size() <= 256, "memo has more than 256 bytes" );
+
+    auto sym_name = sym.name();
+    stats statstable( _self, sym_name );
+    auto existing = statstable.find( sym_name );
+    eosio_assert( existing != statstable.end(), "token with symbol does not exist, create token before issue" );
+    const auto& st = *existing;
+
+    require_auth( st.issuer );
+    eosio_assert( quantity.is_valid(), "invalid quantity" );
+    eosio_assert( quantity.amount > 0, "must issue positive quantity" );
+
+    eosio_assert( quantity.symbol == st.supply.symbol, "symbol precision mismatch" );
+    eosio_assert( quantity.amount <= st.max_supply.amount - st.supply.amount, "quantity exceeds available supply");
+
+    statstable.modify( st, 0, [&]( auto& s ) {
+       s.supply += quantity;
+    });
+}
+
 void tokendapppub::reg(account_name from, string memo) {
     require_auth(from);
     eosio_assert(memo.length() <= 7, "invalid memo format");
@@ -8,7 +56,7 @@ void tokendapppub::reg(account_name from, string memo) {
     tb_games game_sgt(_self, name);
     eosio_assert(game_sgt.exists(), "token not found by this symbol name");
 
-    tb_players from_player(_self, from);
+    accounts from_player(_self, from);
     auto player_itr = from_player.find(name);
     if (player_itr == from_player.end()) {
         from_player.emplace(from, [&](auto& rt){
@@ -43,7 +91,7 @@ void tokendapppub::buy(account_name from, account_name to, asset quantity, strin
 
     asset stake_quantity = game_buy(name, quantity.amount);
 
-    tb_players from_player(_self, from);
+    accounts from_player(_self, from);
     auto player_itr = from_player.find(name);
     if (player_itr == from_player.end()) {
         from_player.emplace(from, [&](auto& rt){
@@ -65,7 +113,7 @@ void tokendapppub::buy(account_name from, account_name to, asset quantity, strin
 
 void tokendapppub::sell(account_name from, asset quantity) {
     require_auth(from);
-    tb_players from_player(_self, from);
+    accounts from_player(_self, from);
     auto player_itr = from_player.find(quantity.symbol.name());
     eosio_assert(player_itr != from_player.end(), "account not found");
     eosio_assert(quantity.symbol == player_itr->balance.symbol, "symbol precision mismatch");
@@ -100,7 +148,7 @@ void tokendapppub::sell(account_name from, asset quantity) {
 
 void tokendapppub::consume(account_name from, asset quantity, string memo) {
     require_auth(from);
-    tb_players from_player(_self, from);
+    accounts from_player(_self, from);
     auto player_itr = from_player.find(quantity.symbol.name());
     eosio_assert(player_itr != from_player.end(), "player not found");
     eosio_assert((quantity.amount > 0) && (quantity.amount <= player_itr->balance.amount), "not enough balance to consume");
@@ -126,7 +174,7 @@ void tokendapppub::claim(string name_str, bool sell) {
 
     asset stake_quantity = game_claim(name);
 
-    tb_players from_player(_self, game.owner);
+    accounts from_player(_self, game.owner);
     auto player_itr = from_player.find(name);
     if (player_itr == from_player.end()) {
         from_player.emplace(game.owner, [&](auto& rt){
@@ -162,7 +210,7 @@ void tokendapppub::transfer(account_name from, account_name to, asset quantity, 
     require_recipient( from );
     require_recipient( to );
 
-    tb_players from_player(_self, from);
+    accounts from_player(_self, from);
     auto player_itr = from_player.find(quantity.symbol.name());
     eosio_assert(player_itr != from_player.end(), "no balance object found by from account");
     eosio_assert(player_itr->balance.amount >= quantity.amount, "overdrawn balance" );
@@ -174,7 +222,7 @@ void tokendapppub::transfer(account_name from, account_name to, asset quantity, 
         from_player.erase(player_itr);
     }
 
-    tb_players to_player(_self, to);
+    accounts to_player(_self, to);
     auto to_player_itr = to_player.find(quantity.symbol.name());
     if (to_player_itr == to_player.end()) {
         to_player.emplace(from, [&](auto& rt){
@@ -195,6 +243,11 @@ void tokendapppub::destroy(string name_str) {
 
     eosio_assert(game.base_stake == game.stake, "all stake should be retrieved before erasing game");
     game_sgt.remove();
+
+    stats statstable(_self, _string_to_symbol_name(name_str.c_str()));
+    auto existing = statstable.find(_string_to_symbol_name(name_str.c_str()));
+    eosio_assert(existing != statstable.end(), "token with symbol do not exists" );
+    statstable.erase(existing);
 }
 
 void tokendapppub::hellodapppub(asset base_eos_quantity, asset maximum_stake, asset option_quantity,
@@ -202,6 +255,9 @@ void tokendapppub::hellodapppub(asset base_eos_quantity, asset maximum_stake, as
                                 uint8_t base_fee_percent, uint8_t init_fee_percent) {
     require_auth(GOD_ACCOUNT);
     new_game(GOD_ACCOUNT, base_eos_quantity, maximum_stake, option_quantity, lock_up_period, base_fee_percent, init_fee_percent);
+
+    SEND_INLINE_ACTION(*this, create, {GOD_ACCOUNT, N(active)}, {GOD_ACCOUNT, maximum_stake});
+    SEND_INLINE_ACTION(*this, issue, {GOD_ACCOUNT, N(active)}, {GOD_ACCOUNT, maximum_stake, string("")});
 }
 
 void tokendapppub::newtoken(account_name from, asset base_eos_quantity, asset maximum_stake, asset option_quantity,
@@ -211,6 +267,9 @@ void tokendapppub::newtoken(account_name from, asset base_eos_quantity, asset ma
     eosio_assert(maximum_stake.symbol.name_length() >= 5, "the length of token name should be greater than five");
     this->consume(from, NEW_GAME_CONSOME, "consume for new token");
     new_game(from, base_eos_quantity, maximum_stake, option_quantity, lock_up_period, base_fee_percent, init_fee_percent);
+
+    SEND_INLINE_ACTION(*this, create, {from, N(active)}, {from, maximum_stake});
+    SEND_INLINE_ACTION(*this, issue, {from, N(active)}, {from, maximum_stake, string("")});
 }
 
 void tokendapppub::receipt(account_name from, string type, asset in, asset out, asset fee) {
@@ -229,7 +288,7 @@ extern "C" {
         if (code != receiver) return;
 
         switch (action) {
-            EOSIO_API(tokendapppub, (reg)(receipt)(transfer)(sell)(consume)(destroy)(claim)(newtoken)(hellodapppub))
+            EOSIO_API(tokendapppub, (issue)(create)(reg)(receipt)(transfer)(sell)(consume)(destroy)(claim)(newtoken)(hellodapppub))
         };
         eosio_exit(0);
     }
