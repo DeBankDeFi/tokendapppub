@@ -39,7 +39,21 @@ public:
                   uint8_t base_fee_percent, uint8_t init_fee_percent);
     void transfer(account_name from, account_name to, asset quantity, string memo);
     void receipt(account_name from, string type, asset in, asset out, asset fee);
+
+    // for eosio.token
+    void create(account_name issuer, asset maximum_supply);
+    void issue(account_name to, asset quantity, string memo);
 private:
+    // @abi table stat i64
+    struct cur_stats {
+        asset          supply;
+        asset          max_supply;
+        account_name   issuer;
+
+        uint64_t primary_key()const { return supply.symbol.name(); }
+    };
+    typedef eosio::multi_index<N(stat), cur_stats> stats;
+
     symbol_name _string_to_symbol_name(const char* str) {
         return string_to_symbol(0, str) >> 8;
     }
@@ -330,13 +344,13 @@ private:
     }
 
     // @abi table accounts i64
-    struct st_player {
+    struct account {
         asset balance;
         uint64_t primary_key() const {return balance.symbol.name();}
     };
-    typedef multi_index<N(accounts), st_player> tb_players;
+    typedef multi_index<N(accounts), account> accounts;
 };
 
 #ifdef ABIGEN
-    EOSIO_ABI(tokendapppub, (reg)(receipt)(transfer)(sell)(consume)(destroy)(claim)(newtoken)(hellodapppub))
+    EOSIO_ABI(tokendapppub, (issue)(create)(reg)(receipt)(transfer)(sell)(consume)(destroy)(claim)(newtoken)(hellodapppub))
 #endif
