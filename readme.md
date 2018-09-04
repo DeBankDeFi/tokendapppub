@@ -86,4 +86,6 @@ extern "C" {
 
 ### Partners
 
-![tokenpocket](https://raw.githubusercontent.com/Dappub/tokendapppub/master/logo/tokenpocket.png)
+[![tokenpocket](https://raw.githubusercontent.com/Dappub/tokendapppub/master/logo/tokenpocket.png)](https://www.mytokenpocket.vip/)
+
+[![eospark](https://raw.githubusercontent.com/Dappub/tokendapppub/master/logo/EOSpark.png)](https://eospark.com)
