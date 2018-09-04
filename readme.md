@@ -1,4 +1,4 @@
-![tokendapppub](https://raw.githubusercontent.com/Dappub/tokendapppub/master/logo/tokendapppub-rectangle.jpg)
+[![tokendapppub](https://raw.githubusercontent.com/Dappub/tokendapppub/master/logo/tokendapppub-rectangle.jpg)](https://dapp.pub)
 
 # tokendapppub: a bancor based utility-enhanced token protocol
 
