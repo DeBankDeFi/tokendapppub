@@ -1,5 +1,16 @@
 #include "tokendapppub.hpp"
 
+void tokendapppub::detail(string tokenname, string dappname, string logo, string website,
+                          string social, string community, string medium, string github, account_name contract, string intro) {
+    symbol_name name = _string_to_symbol_name(tokenname.c_str());
+    tb_games game_sgt(_self, name);
+    eosio_assert(game_sgt.exists(), "token not found by this symbol_name");
+    st_game game = game_sgt.get();
+    require_auth(game.owner);
+
+    eosio_assert(intro.size() <= 1024, "memo has more than 1024 bytes");
+}
+
 void tokendapppub::create(account_name issuer, asset maximum_supply) {
     require_auth(issuer);
     
@@ -11,6 +22,7 @@ void tokendapppub::create(account_name issuer, asset maximum_supply) {
     tb_games game_sgt(_self, sym.name());
     eosio_assert(game_sgt.exists(), "game not found by this symbol name");
     st_game game = game_sgt.get();
+    eosio_assert(game.symbol == sym, "symbol precision mismatch");
     eosio_assert(game.owner == issuer, "issuer is not the owner of this token");
     eosio_assert(game.base_stake - game.deserved_option + game.base_option == maximum_supply.amount, "invalid maximum supply");
 
@@ -288,7 +300,7 @@ extern "C" {
         if (code != receiver) return;
 
         switch (action) {
-            EOSIO_API(tokendapppub, (issue)(create)(reg)(receipt)(transfer)(sell)(consume)(destroy)(claim)(newtoken)(hellodapppub))
+            EOSIO_API(tokendapppub, (detail)(issue)(create)(reg)(receipt)(transfer)(sell)(consume)(destroy)(claim)(newtoken)(hellodapppub))
         };
         eosio_exit(0);
     }

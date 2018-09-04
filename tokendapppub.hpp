@@ -39,6 +39,8 @@ public:
                   uint8_t base_fee_percent, uint8_t init_fee_percent);
     void transfer(account_name from, account_name to, asset quantity, string memo);
     void receipt(account_name from, string type, asset in, asset out, asset fee);
+    void detail(string tokenname, string dappname, string logo, string website, string social,
+                string community, string medium, string github, account_name contract, string memo);
 
     // for eosio.token
     void create(account_name issuer, asset maximum_supply);
@@ -352,5 +354,5 @@ private:
 };
 
 #ifdef ABIGEN
-    EOSIO_ABI(tokendapppub, (issue)(create)(reg)(receipt)(transfer)(sell)(consume)(destroy)(claim)(newtoken)(hellodapppub))
+    EOSIO_ABI(tokendapppub, (detail)(issue)(create)(reg)(receipt)(transfer)(sell)(consume)(destroy)(claim)(newtoken)(hellodapppub))
 #endif
