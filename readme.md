@@ -1,3 +1,5 @@
+![tokendapppub](https://raw.githubusercontent.com/Dappub/tokendapppub/master/logo/tokendapppub-rectangle.jpg)
+
 # tokendapppub: a bancor based utility-enhanced token protocol
 
 * Read the Whitepaper at first: [English](https://github.com/Dappub/tokendapppub/blob/master/Bancor%20based%20utility-enhanced%20token%20protocol.pdf)/[Chinese](https://github.com/Dappub/tokendapppub/blob/master/%E5%9F%BA%E4%BA%8E%E7%8F%AD%E6%9F%AF%E7%9A%84%E5%AE%9E%E7%94%A8%E5%A2%9E%E5%BC%BA%E5%9E%8B%E9%80%9A%E8%AF%81%E5%8D%8F%E8%AE%AE.pdf)
@@ -82,3 +84,6 @@ extern "C" {
 }
 ```
 
+### Partners
+
+![tokenpocket](https://raw.githubusercontent.com/Dappub/tokendapppub/master/logo/tokenpocket.jpg)
