@@ -88,4 +88,4 @@ extern "C" {
 
 [![tokenpocket](https://raw.githubusercontent.com/Dappub/tokendapppub/master/logo/tokenpocket.png)](https://www.mytokenpocket.vip/)
 
-[![eospark](https://raw.githubusercontent.com/Dappub/tokendapppub/master/logo/EOSpark.png)](https://eospark.com)
+[![eospark](https://raw.githubusercontent.com/Dappub/tokendapppub/master/logo/EOSpark.png)](https://eospark.com/MainNet/account/tokendapppub)
