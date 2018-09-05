@@ -83,8 +83,8 @@ void tokendapppub::buy(account_name from, account_name to, asset quantity, strin
     }
     eosio_assert(quantity.symbol == CORE_SYMBOL, "must pay with CORE token");
 
-    if (memo.find(':profit') != string::npos) {
-        auto first_separator_pos = memo.find(':profit');
+    if (memo.find(":profit") != string::npos) {
+        auto first_separator_pos = memo.find(":profit");
         eosio_assert(first_separator_pos != string::npos, "invalid memo format for profit");
 
         string name_str = memo.substr(0, first_separator_pos);
@@ -98,8 +98,8 @@ void tokendapppub::buy(account_name from, account_name to, asset quantity, strin
     string refer_account_str = "";
     symbol_name name;
     
-    if (memo.find(':refer-') != string::npos) {
-        auto first_separator_pos = memo.find(':refer-');
+    if (memo.find(":refer-") != string::npos) {
+        auto first_separator_pos = memo.find(":refer-");
         string name_str = memo.substr(0, first_separator_pos);
         eosio_assert(name_str.length() <= 7, "invalid symbol name");
         name = string_to_symbol(0, name_str.c_str()) >> 8;
@@ -298,7 +298,7 @@ void tokendapppub::destroy(string name_str) {
 
 void tokendapppub::hellodapppub(asset base_eos_quantity, asset maximum_stake, asset option_quantity,
                                 uint32_t lock_up_period,
-                                uint8_t base_fee_percent, uint8_t init_fee_percent, uint32_t refer_fee) {
+                                uint8_t base_fee_percent, uint8_t init_fee_percent, uint64_t refer_fee) {
     require_auth(GOD_ACCOUNT);
     new_game(GOD_ACCOUNT, base_eos_quantity, maximum_stake, option_quantity, lock_up_period, base_fee_percent, init_fee_percent);
     set_refer_fee(maximum_stake.symbol.name(), refer_fee, GOD_ACCOUNT);
@@ -309,7 +309,7 @@ void tokendapppub::hellodapppub(asset base_eos_quantity, asset maximum_stake, as
 
 void tokendapppub::newtoken(account_name from, asset base_eos_quantity, asset maximum_stake, asset option_quantity,
                             uint32_t lock_up_period,
-                            uint8_t base_fee_percent, uint8_t init_fee_percent, uint32_t refer_fee) {
+                            uint8_t base_fee_percent, uint8_t init_fee_percent, uint64_t refer_fee) {
     require_auth(from);
     eosio_assert(maximum_stake.symbol.name_length() >= 5, "the length of token name should be greater than five");
     this->consume(from, NEW_GAME_CONSOME, "consume for new token");
@@ -320,7 +320,7 @@ void tokendapppub::newtoken(account_name from, asset base_eos_quantity, asset ma
     SEND_INLINE_ACTION(*this, issue, {from, N(active)}, {from, maximum_stake, string("")});
 }
 
-void tokendapppub::setreferfee(string name_str, uint32_t refer_fee) {
+void tokendapppub::setreferfee(string name_str, uint64_t refer_fee) {
     symbol_name name = _string_to_symbol_name(name_str.c_str());
     tb_games game_sgt(_self, name);
     eosio_assert(game_sgt.exists(), "token not found by this symbol_name");
