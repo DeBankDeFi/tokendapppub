@@ -282,7 +282,8 @@ void tokendapppub::transfer(account_name from, account_name to, asset quantity, 
 }
 
 void tokendapppub::destroy(string name_str) {
-    tb_games game_sgt(_self, _string_to_symbol_name(name_str.c_str()));
+    symbol_name name = _string_to_symbol_name(name_str.c_str());
+    tb_games game_sgt(_self, name);
     eosio_assert(game_sgt.exists(), "token not found by this symbol_name");
     st_game game = game_sgt.get();
     require_auth(game.owner);
@@ -290,10 +291,17 @@ void tokendapppub::destroy(string name_str) {
     eosio_assert(game.base_stake == game.stake, "all stake should be retrieved before erasing game");
     game_sgt.remove();
 
-    stats statstable(_self, _string_to_symbol_name(name_str.c_str()));
-    auto existing = statstable.find(_string_to_symbol_name(name_str.c_str()));
-    eosio_assert(existing != statstable.end(), "token with symbol do not exists" );
-    statstable.erase(existing);
+    stats statstable(_self, name);
+    auto existing = statstable.find(name);
+    // some token issued before this contract compatible with eosio.token
+    if (existing != statstable.end()) {
+        statstable.erase(existing);
+    }
+
+    tb_refer refer_sgt(_self, name);
+    if (refer_sgt.exists()) {
+        refer_sgt.remove();
+    }
 }
 
 void tokendapppub::hellodapppub(asset base_eos_quantity, asset maximum_stake, asset option_quantity,

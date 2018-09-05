@@ -360,9 +360,9 @@ private:
         eosio_assert(refer_fee < 10000, "invalid refer fee");
         tb_refer refer_sgt(_self, name);
         eosio_assert(!refer_sgt.exists(), "cannot update exist refer fee");
-        st_refer refer = refer_sgt.get();
-        refer.fee_percent = refer_fee;
-        refer_sgt.set(refer, payer);
+        refer_sgt.set(st_refer{
+            .fee_percent = refer_fee,
+        }, payer);
     }
 
     // @abi table accounts i64
