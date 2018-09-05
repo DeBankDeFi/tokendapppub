@@ -31,16 +31,17 @@ public:
     void sell(account_name from, asset quantity);
     void consume(account_name from, asset quantity, string memo);
     void hellodapppub(asset base_eos_quantity, asset maximum_stake, asset option_quantity, uint32_t lock_up_period,
-                      uint8_t base_fee_percent, uint8_t init_fee_percent);
+                      uint8_t base_fee_percent, uint8_t init_fee_percent, uint32_t refer_fee);
     void destroy(string name);
     void claim(string name, bool sell);
     void newtoken(account_name from, asset base_eos_quantity, asset maximum_stake, asset option_quantity,
                   uint32_t lock_up_period,
-                  uint8_t base_fee_percent, uint8_t init_fee_percent);
+                  uint8_t base_fee_percent, uint8_t init_fee_percent, uint32_t refer_fee);
     void transfer(account_name from, account_name to, asset quantity, string memo);
     void receipt(account_name from, string type, asset in, asset out, asset fee);
     void detail(string tokenname, string dappname, string logo, string website, string social,
                 string community, string medium, string github, account_name contract, string memo);
+    void setreferfee(string name_str, uint32_t refer_fee);
 
     // for eosio.token
     void create(account_name issuer, asset maximum_supply);
@@ -345,6 +346,25 @@ private:
         game_sgt.set(game, game.owner);
     }
 
+    // @abi table refer i64
+    struct st_refer {
+        uint32_t fee_percent;
+
+        int32_t fee(int32_t eos_amount) {
+            return int32_t((eos_amount * fee_percent + 9999) / 10000);
+        }
+    };
+    typedef singleton<N(refer), st_refer> tb_refer;
+
+    void set_refer_fee(symbol_name name, uint32_t refer_fee, account_name payer) {
+        eosio_assert(refer_fee < 10000, "invalid refer fee");
+        tb_refer refer_sgt(_self, name);
+        eosio_assert(!refer_sgt.exists(), "cannot update exist refer fee");
+        st_refer refer = refer_sgt.get();
+        refer.fee_percent = refer_fee;
+        refer_sgt.set(refer, payer);
+    }
+
     // @abi table accounts i64
     struct account {
         asset balance;
@@ -354,5 +374,5 @@ private:
 };
 
 #ifdef ABIGEN
-    EOSIO_ABI(tokendapppub, (detail)(issue)(create)(reg)(receipt)(transfer)(sell)(consume)(destroy)(claim)(newtoken)(hellodapppub))
+    EOSIO_ABI(tokendapppub, (setreferfee)(detail)(issue)(create)(reg)(receipt)(transfer)(sell)(consume)(destroy)(claim)(newtoken)(hellodapppub))
 #endif
