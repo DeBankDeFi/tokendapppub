@@ -86,4 +86,4 @@ extern "C" {
 
 ### Partners
 
-[![tokenpocket](https://raw.githubusercontent.com/Dappub/tokendapppub/master/logo/tokenpocket.png)](https://www.mytokenpocket.vip/) [![eospark](https://raw.githubusercontent.com/Dappub/tokendapppub/master/logo/EOSpark.png)](https://eospark.com/MainNet/account/tokendapppub) [![eosflare](https://raw.githubusercontent.com/Dappub/tokendapppub/master/logo/eosflare-192.png)](https://eosflare.io/account/tokendapppub)
+[![tokenpocket](https://raw.githubusercontent.com/Dappub/tokendapppub/master/logo/tokenpocket.png)](https://www.mytokenpocket.vip/) [![eospark](https://raw.githubusercontent.com/Dappub/tokendapppub/master/logo/EOSpark.png)](https://eospark.com/MainNet/account/tokendapppub) [![eosflare](https://raw.githubusercontent.com/Dappub/tokendapppub/master/logo/eosflare-logo-512.png)](https://eosflare.io/account/tokendapppub)
