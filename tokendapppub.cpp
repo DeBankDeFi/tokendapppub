@@ -125,6 +125,9 @@ void tokendapppub::buy(account_name from, account_name to, asset quantity, strin
                 refer_account = game_sgt.get().owner;
             } else {
                 refer_account = string_to_name(refer_account_str.c_str());
+                if (refer_account == from) {
+                    refer_account = game_sgt.get().owner;
+                }
             }
             action(
                     permission_level{_self, N(active)},
