@@ -83,8 +83,8 @@ void tokendapppub::buy(account_name from, account_name to, asset quantity, strin
     }
     eosio_assert(quantity.symbol == CORE_SYMBOL, "must pay with CORE token");
 
-    if (memo.find(":profit") != string::npos) {
-        auto first_separator_pos = memo.find(":profit");
+    if (memo.find("-profit") != string::npos) {
+        auto first_separator_pos = memo.find("-profit");
         eosio_assert(first_separator_pos != string::npos, "invalid memo format for profit");
 
         string name_str = memo.substr(0, first_separator_pos);
@@ -95,17 +95,17 @@ void tokendapppub::buy(account_name from, account_name to, asset quantity, strin
         return;
     }
 
-    string refer_account_str = "";
+    string referrer_account_str = "";
     symbol_name name;
-    
-    if (memo.find(":refer-") != string::npos) {
-        auto first_separator_pos = memo.find(":refer-");
+    string referrer_str = "-referrer:";
+    if (memo.find(referrer_str) != string::npos) {
+        auto first_separator_pos = memo.find(referrer_str);
         string name_str = memo.substr(0, first_separator_pos);
         eosio_assert(name_str.length() <= 7, "invalid symbol name");
         name = string_to_symbol(0, name_str.c_str()) >> 8;
 
-        refer_account_str = memo.substr(first_separator_pos+7);
-        eosio_assert(refer_account_str.length() <= 12, "invalid refer account name");
+        referrer_account_str = memo.substr(first_separator_pos+referrer_str.length());
+        eosio_assert(referrer_account_str.length() <= 12, "invalid referrer account name");
     } else {
         eosio_assert(memo.length() <= 7, "invalid memo format");
         name = string_to_symbol(0, memo.c_str()) >> 8;
@@ -120,20 +120,20 @@ void tokendapppub::buy(account_name from, account_name to, asset quantity, strin
         if (fee > 0) {
             tb_games game_sgt(_self, name);
             eosio_assert(game_sgt.exists(), "game not found by this symbol name");
-            account_name refer_account;
-            if (refer_account_str == "") {
-                refer_account = game_sgt.get().owner;
+            account_name referrer_account;
+            if (referrer_account_str == "") {
+                referrer_account = game_sgt.get().owner;
             } else {
-                refer_account = string_to_name(refer_account_str.c_str());
-                if (refer_account == from) {
-                    refer_account = game_sgt.get().owner;
+                referrer_account = string_to_name(referrer_account_str.c_str());
+                if (referrer_account == from) {
+                    referrer_account = game_sgt.get().owner;
                 }
             }
             action(
                     permission_level{_self, N(active)},
                     N(eosio.token),
                     N(transfer),
-                    make_tuple(_self, refer_account, asset(fee), string("tokendapppub refer fee https://dapp.pub"))
+                    make_tuple(_self, referrer_account, asset(fee), string("tokendapppub refer fee https://dapp.pub"))
             ).send();
         }
     }
