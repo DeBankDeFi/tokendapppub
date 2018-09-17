@@ -324,7 +324,7 @@ void tokendapppub::newtoken(account_name from, asset base_eos_quantity, asset ma
     require_auth(from);
     asset fee = NEW_GAME_CONSOME;
     if (maximum_stake.symbol.name_length() <= 3) {
-        fee = fee * pow(10, 4 - maximum_stake.symbol.name_length());
+        fee = NEW_GAME_CONSOME * pow(10, 4 - maximum_stake.symbol.name_length());
     }
     this->consume(from, fee, "consume for new token");
     new_game(from, base_eos_quantity, maximum_stake, option_quantity, lock_up_period, base_fee_percent, init_fee_percent, start_time);
