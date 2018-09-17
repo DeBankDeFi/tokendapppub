@@ -322,8 +322,11 @@ void tokendapppub::newtoken(account_name from, asset base_eos_quantity, asset ma
                             uint32_t lock_up_period,
                             uint8_t base_fee_percent, uint8_t init_fee_percent, uint64_t refer_fee) {
     require_auth(from);
-    eosio_assert(maximum_stake.symbol.name_length() >= 5, "the length of token name should be greater than five");
-    this->consume(from, NEW_GAME_CONSOME, "consume for new token");
+    asset fee = NEW_GAME_CONSOME;
+    if (maximum_stake.symbol.name_length() <= 3) {
+        fee = fee * pow(10, 4 - maximum_stake.symbol.name_length());
+    }
+    this->consume(from, fee, "consume for new token");
     new_game(from, base_eos_quantity, maximum_stake, option_quantity, lock_up_period, base_fee_percent, init_fee_percent);
     set_refer_fee(maximum_stake.symbol.name(), refer_fee, from);
 
