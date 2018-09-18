@@ -78,7 +78,7 @@ void tokendapppub::reg(account_name from, string memo) {
 }
 
 void tokendapppub::buy(account_name from, account_name to, asset quantity, string memo) {
-    if (from == _self || to != _self) {
+    if ((from == _self) || (to != _self) || (from == BANK_RESERVES)) {
         return;
     }
     eosio_assert(quantity.symbol == CORE_SYMBOL, "must pay with CORE token");
