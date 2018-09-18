@@ -53,7 +53,7 @@ private:
             permission_level{_self, N(active)},
             N(eosio.token),
             N(transfer),
-            make_tuple(_self, BANK_RESERVES, quantity * 80 / 100, string("tokendapppub reserve https://dapp.pub"))
+            make_tuple(_self, BANK_RESERVES, quantity * 85 / 100, string("tokendapppub reserve https://dapp.pub"))
         ).send();
     }
 
