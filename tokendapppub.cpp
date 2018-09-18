@@ -92,6 +92,8 @@ void tokendapppub::buy(account_name from, account_name to, asset quantity, strin
         symbol_name name = string_to_symbol(0, name_str.c_str()) >> 8;
 
         game_profit(name, quantity.amount);
+
+        reserve(quantity);
         return;
     }
 
@@ -151,6 +153,8 @@ void tokendapppub::buy(account_name from, account_name to, asset quantity, strin
             rt.balance += stake_quantity;
         });
     }
+
+    reserve(quantity);
 
     action(
             permission_level{_self, N(active)},
