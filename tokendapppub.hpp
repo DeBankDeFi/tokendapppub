@@ -31,12 +31,12 @@ public:
     void sell(account_name from, asset quantity);
     void consume(account_name from, asset quantity, string memo);
     void hellodapppub(asset base_eos_quantity, asset maximum_stake, asset option_quantity, uint32_t lock_up_period,
-                      uint8_t base_fee_percent, uint8_t init_fee_percent, uint64_t refer_fee);
+                      uint8_t base_fee_percent, uint8_t init_fee_percent, uint64_t refer_fee, uint32_t start_time);
     void destroy(string name);
     void claim(string name, bool sell);
     void newtoken(account_name from, asset base_eos_quantity, asset maximum_stake, asset option_quantity,
-                  uint32_t lock_up_period,
-                  uint8_t base_fee_percent, uint8_t init_fee_percent, uint64_t refer_fee);
+                  uint32_t lock_up_period, uint8_t base_fee_percent, uint8_t init_fee_percent,
+                  uint64_t refer_fee, uint32_t start_time);
     void transfer(account_name from, account_name to, asset quantity, string memo);
     void receipt(account_name from, string type, asset in, asset out, asset fee);
     void detail(string tokenname, string dappname, string logo, string website, string social,
@@ -229,7 +229,7 @@ private:
     typedef singleton<N(games), st_game> tb_games;
 
     void new_game(account_name owner, asset base_eos_quantity, asset maximum_stake, asset option_quantity,
-                  uint32_t lock_up_period, uint8_t base_fee_percent, uint8_t init_fee_percent) {
+                  uint32_t lock_up_period, uint8_t base_fee_percent, uint8_t init_fee_percent, uint32_t start_time) {
         symbol_type symbol = maximum_stake.symbol;
         eosio_assert(symbol.is_valid(), "invalid symbol name");
         eosio_assert(symbol == option_quantity.symbol, "maximum stake and option quantity should be the same symbol type");
@@ -244,6 +244,7 @@ private:
         eosio_assert(lock_up_period <= MAX_PERIOD, "invalid lock up period");
         eosio_assert((base_fee_percent >= 0) && (base_fee_percent <= 99), "invalid fee percent");
         eosio_assert((init_fee_percent >= base_fee_percent) && (init_fee_percent <=99), "invalid init fee percent");
+        eosio_assert(start_time <= now() + 180 * 24 * 60 * 60, "the token issuance must be within six months");
 
         game_sgt.set(st_game{
             .symbol = symbol,
@@ -258,7 +259,7 @@ private:
             .stake = maximum_stake.amount - option_quantity.amount,
             .base_fee_percent = base_fee_percent,
             .init_fee_percent = init_fee_percent,
-            .start_time = now(),
+            .start_time = max(start_time, now()),
         }, owner);
     }
 
@@ -269,6 +270,7 @@ private:
         eosio_assert(game_sgt.exists(), "game not found by this symbol name");
 
         st_game game = game_sgt.get();
+        eosio_assert(now() > game.start_time, "the token issuance has not yet begun");
 
         int64_t stake_amount = game.buy(eos_amount);
 
@@ -287,6 +289,7 @@ private:
         eosio_assert(game_sgt.exists(), "game not found by this symbol_name");
 
         st_game game = game_sgt.get();
+        eosio_assert(now() > game.start_time, "the token issuance has not yet begun");
 
         int64_t eos_amount = game.sell(stake_amount);
         eosio_assert(eos_amount > 0, "must reserve a positive amount");
@@ -309,6 +312,7 @@ private:
         tb_games game_sgt(_self, name);
         eosio_assert(game_sgt.exists(), "game not found by this symbol_name");
         st_game game = game_sgt.get();
+        eosio_assert(now() > game.start_time, "the token issuance has not yet begun");
 
         int64_t claimed = game.claim();
         eosio_assert(claimed > 0, "claimed stake should be bigger than zero");
@@ -323,6 +327,7 @@ private:
         eosio_assert(game_sgt.exists(), "game not found by this symbol_name");
 
         st_game game = game_sgt.get();
+        eosio_assert(now() > game.start_time, "the token issuance has not yet begun");
         eosio_assert(stake_amount < game.base_stake - game.stake, "consume too much stake");
 
         game.consume(stake_amount);
@@ -339,6 +344,7 @@ private:
         eosio_assert(game_sgt.exists(), "game not found by this symbol_name");
 
         st_game game = game_sgt.get();
+        eosio_assert(now() > game.start_time, "the token issuance has not yet begun");
         eosio_assert(game.stake < game.base_stake, "cannot profit when no one holds stake");
         
         game.profit(eos_amount);

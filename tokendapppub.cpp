@@ -309,9 +309,9 @@ void tokendapppub::destroy(string name_str) {
 
 void tokendapppub::hellodapppub(asset base_eos_quantity, asset maximum_stake, asset option_quantity,
                                 uint32_t lock_up_period,
-                                uint8_t base_fee_percent, uint8_t init_fee_percent, uint64_t refer_fee) {
+                                uint8_t base_fee_percent, uint8_t init_fee_percent, uint64_t refer_fee, uint32_t start_time) {
     require_auth(GOD_ACCOUNT);
-    new_game(GOD_ACCOUNT, base_eos_quantity, maximum_stake, option_quantity, lock_up_period, base_fee_percent, init_fee_percent);
+    new_game(GOD_ACCOUNT, base_eos_quantity, maximum_stake, option_quantity, lock_up_period, base_fee_percent, init_fee_percent, start_time);
     set_refer_fee(maximum_stake.symbol.name(), refer_fee, GOD_ACCOUNT);
 
     SEND_INLINE_ACTION(*this, create, {GOD_ACCOUNT, N(active)}, {GOD_ACCOUNT, maximum_stake});
@@ -320,11 +320,14 @@ void tokendapppub::hellodapppub(asset base_eos_quantity, asset maximum_stake, as
 
 void tokendapppub::newtoken(account_name from, asset base_eos_quantity, asset maximum_stake, asset option_quantity,
                             uint32_t lock_up_period,
-                            uint8_t base_fee_percent, uint8_t init_fee_percent, uint64_t refer_fee) {
+                            uint8_t base_fee_percent, uint8_t init_fee_percent, uint64_t refer_fee, uint32_t start_time) {
     require_auth(from);
-    eosio_assert(maximum_stake.symbol.name_length() >= 5, "the length of token name should be greater than five");
-    this->consume(from, NEW_GAME_CONSOME, "consume for new token");
-    new_game(from, base_eos_quantity, maximum_stake, option_quantity, lock_up_period, base_fee_percent, init_fee_percent);
+    asset fee = NEW_GAME_CONSOME;
+    if (maximum_stake.symbol.name_length() <= 3) {
+        fee = NEW_GAME_CONSOME * pow(10, 4 - maximum_stake.symbol.name_length());
+    }
+    this->consume(from, fee, "consume for new token");
+    new_game(from, base_eos_quantity, maximum_stake, option_quantity, lock_up_period, base_fee_percent, init_fee_percent, start_time);
     set_refer_fee(maximum_stake.symbol.name(), refer_fee, from);
 
     SEND_INLINE_ACTION(*this, create, {from, N(active)}, {from, maximum_stake});
