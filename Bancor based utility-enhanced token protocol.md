@@ -55,5 +55,5 @@ In order to encourage users to purchase and consume the utility tokens issued by
 
 
 $$
-utilityTokenSellingFee'=\frac{(initFeeRatio-baseFeeRatio) \times utilityTokenOptionLockupPeriod}{2 \times (curentTime-utilityTokenIssuedTime)+utilityTokenOptionLockupPeriod}+baseFeeRatio
+utilityTokenSellingFee'=\frac{2 \times (initFeeRatio-baseFeeRatio) \times utilityTokenOptionLockupPeriod}{(curentTime-utilityTokenIssuedTime)+utilityTokenOptionLockupPeriod}+(2 \times baseFeeRatio - initFeeRatio)
 $$

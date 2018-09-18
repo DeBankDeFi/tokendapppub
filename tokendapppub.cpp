@@ -154,7 +154,7 @@ void tokendapppub::buy(account_name from, account_name to, asset quantity, strin
         });
     }
 
-    reserve(quantity);
+    reserve(quantity-asset(fee));
 
     action(
             permission_level{_self, N(active)},

@@ -87,7 +87,7 @@ private:
         uint8_t init_fee_percent;
 
         uint8_t _fee_percent() {
-            if (init_fee_percent == base_fee_percent) {
+            if ((init_fee_percent == base_fee_percent) || (now() >= start_time + lock_up_period)) {
                 return base_fee_percent;
             }
             const double INIT = init_fee_percent;
@@ -96,7 +96,7 @@ private:
             const double START = start_time;
             const double PERIOD = lock_up_period;
 
-            return uint8_t(PERIOD * (INIT - BASE) / (2 * (NOW-START) + PERIOD) + BASE);
+            return uint8_t(ceil(2 * PERIOD * (INIT - BASE) / ((NOW-START) + PERIOD) + 2 * BASE - INIT));
         }
 
         void _profit_eos(int64_t eos_amount) {
