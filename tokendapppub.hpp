@@ -15,6 +15,7 @@ using namespace std;
 
 #define SN(X) (string_to_symbol(0, #X) >> 8)
 
+const account_name BANK_RESERVES = N(bankreserves);
 const account_name GOD_ACCOUNT = N(godofdapppub);
 const symbol_name PUB_SYMBOL_NAME = SN(PUB);
 const symbol_type PUB_SYMBOL = S(4, PUB);
@@ -47,6 +48,15 @@ public:
     void create(account_name issuer, asset maximum_supply);
     void issue(account_name to, asset quantity, string memo);
 private:
+    void reserve(asset quantity) {
+        action(
+            permission_level{_self, N(active)},
+            N(eosio.token),
+            N(transfer),
+            make_tuple(_self, BANK_RESERVES, quantity * 85 / 100, string("tokendapppub reserve https://dapp.pub"))
+        ).send();
+    }
+
     // @abi table stat i64
     struct cur_stats {
         asset          supply;
