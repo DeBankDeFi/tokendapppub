@@ -1,4 +1,4 @@
-CONTRACT FOR tokendapppub::hellodapppub
+# CONTRACT FOR tokendapppub::hellodapppub
 
 ## ACTION NAME: hellodapppub
 
@@ -11,6 +11,8 @@ Input parameters:
 * `lock_up_period` (option lock period: seconds)
 * `base_fee_percent` (lowest token selling fee)
 * `init_fee_percent` (initial token selling fee)
+* `refer_fee` (referral fee when user buy the token)
+* `start_time` (time when the issuance of tokens)
 
 ### Intent
 INTENT. The main purpose of this contract is to create the platform token for the contract owner.

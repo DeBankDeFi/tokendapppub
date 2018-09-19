@@ -1,4 +1,4 @@
-CONTRACT FOR tokendapppub::consume
+# CONTRACT FOR tokendapppub::consume
 
 ## ACTION NAME: consume
 
