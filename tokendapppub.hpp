@@ -117,6 +117,7 @@ private:
             if (stake == base_stake) {
                 base_stake += stake_amount;
                 stake += stake_amount;
+                claimed_option += stake_amount;
                 return;
             }
 
