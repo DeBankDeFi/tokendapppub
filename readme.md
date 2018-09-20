@@ -85,9 +85,11 @@ extern "C" {
 ### Token Exchange
 
 [![tokenpocket](https://raw.githubusercontent.com/Dappub/logo/master/partners/tpdex-small.png)](https://tpdex.io/#/)
+
 [![tokendapppub](https://github.com/Dappub/logo/blob/master/logo.png)](https://dapp.pub/tokens/?token=PUB)
 
 ### Block Explorer
 
 [![eospark](https://raw.githubusercontent.com/Dappub/tokendapppub/master/logo/EOSpark.png)](https://eospark.com/MainNet/account/tokendapppub)
+
 [![eosflare](https://raw.githubusercontent.com/Dappub/tokendapppub/master/logo/eosflare-logo-512.png)](https://eosflare.io/account/tokendapppub)
