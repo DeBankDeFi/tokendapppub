@@ -84,7 +84,7 @@ extern "C" {
 
 ### Token Exchange
 
-[![tokenpocket](https://raw.githubusercontent.com/Dappub/tokendapppub/master/logo/tpdex-small.png)](https://tpdex.io/#/)
+[![tokenpocket](https://raw.githubusercontent.com/Dappub/logo/master/partners/tpdex-small.png)](https://tpdex.io/#/)
 [![tokendapppub](https://github.com/Dappub/logo/blob/master/logo.png)](https://dapp.pub/tokens/?token=PUB)
 
 ### Block Explorer
