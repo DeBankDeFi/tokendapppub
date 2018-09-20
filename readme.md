@@ -88,6 +88,10 @@ extern "C" {
 
 [![tokendapppub](https://github.com/Dappub/logo/blob/master/logo.png)](https://dapp.pub/tokens/?token=PUB)
 
+![bitportal](https://raw.githubusercontent.com/Dappub/logo/master/partners/bitportal.png)
+
+![51token](https://raw.githubusercontent.com/Dappub/logo/master/partners/51token.png)
+
 ### Block Explorer
 
 [![eospark](https://raw.githubusercontent.com/Dappub/tokendapppub/master/logo/EOSpark.png)](https://eospark.com/MainNet/account/tokendapppub)
