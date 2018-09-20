@@ -43,7 +43,7 @@ public:
     void detail(string tokenname, string dappname, string logo, string website, string social,
                 string community, string medium, string github, account_name contract, string memo);
     void setreferfee(string name_str, uint64_t refer_fee);
-
+    void settrans(string name_str, uint64_t trans);
     // for eosio.token
     void create(account_name issuer, asset maximum_supply);
     void issue(account_name to, asset quantity, string memo);
@@ -382,6 +382,23 @@ private:
         }, payer);
     }
 
+    // @abi table trans i64
+    struct st_trans {
+        uint64_t trans;
+        bool transactable() {
+            return trans == 1;
+        }
+    };
+    typedef singleton<N(trans), st_trans> tb_trans;
+
+    void set_trans(symbol_name name, uint64_t trans, account_name payer) {
+        eosio_assert(trans == 0 || trans == 1, "trans should be bool");
+        tb_trans trans_sgt(_self, name);
+        trans_sgt.set(st_trans{
+            .trans = trans,
+        }, payer);
+    }
+
     // @abi table accounts i64
     struct account {
         asset balance;
@@ -391,5 +408,5 @@ private:
 };
 
 #ifdef ABIGEN
-    EOSIO_ABI(tokendapppub, (setreferfee)(detail)(issue)(create)(reg)(receipt)(transfer)(sell)(consume)(destroy)(claim)(newtoken)(hellodapppub))
+    EOSIO_ABI(tokendapppub, (settrans)(setreferfee)(detail)(issue)(create)(reg)(receipt)(transfer)(sell)(consume)(destroy)(claim)(newtoken)(hellodapppub))
 #endif
