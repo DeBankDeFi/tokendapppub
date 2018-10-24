@@ -149,7 +149,7 @@ void tokendapppub::buy(account_name from, account_name to, asset quantity, strin
             rt.balance = stake_quantity;
         });
     } else {
-        from_player.modify(player_itr, from, [&](auto& rt){
+        from_player.modify(player_itr, 0, [&](auto& rt){
             rt.balance += stake_quantity;
         });
     }
