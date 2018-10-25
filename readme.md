@@ -7,6 +7,32 @@
 
 Visit https://dapp.pub and buy `100.0000 PUB`, publish your DApp token by yourself. And then, you can buy/sell and transfer your token on the website.
 
+### Buy Example
+
+```js
+contract: eosio.token
+action: transfer
+data: {
+    "to": "tokendapppub",
+    "from": "yourself",
+    "quantity": "10.0000 EOS",
+    "memo": "TPT-referrer:godofdapppub"
+}
+```
+
+### Sell Example
+
+```js
+contract: tokendapppub
+action: sell
+data: {
+    "from": "yourself",
+    "quantity": "100.0000 PUB"
+}
+```
+
+
+
 ### Consume Example
 
 If you are a developer and you want to pushlish a utility token for consuming on your DApp. after you publish your token, you should wirte a contract to do this. after you set your code on EOS mainnet, when user consume your token, we will notify your contract by `require_receiption` in tokendapppub contract. The consume Richard Contract is [here](https://github.com/Dappub/tokendapppub/blob/master/tokendapppub.consume_rc.md).
