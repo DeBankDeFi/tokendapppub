@@ -130,6 +130,14 @@ void tokendapppub::buy(account_name from, account_name to, asset quantity, strin
                 if (referrer_account == from) {
                     referrer_account = game_sgt.get().owner;
                 }
+                if (referrer_account != game_sgt.get().owner) {
+                    tb_ref ref_sgt(_self, name);
+                    if (ref_sgt.exists() && !ref_sgt.get().opened()) {
+                        if (!check_referrer_in_whitelist(name, referrer_account)) {
+                            referrer_account = game_sgt.get().owner;
+                        }
+                    }
+                }
             }
             action(
                     permission_level{_self, N(active)},
@@ -373,6 +381,26 @@ void tokendapppub::addtowl(string name_str, account_name agent) {
     add_agent_to_whitelist(name, agent, game.owner);
 }
 
+void tokendapppub::setref(string name_str, uint64_t ref) {
+    symbol_name name = _string_to_symbol_name(name_str.c_str());
+    tb_games game_sgt(_self, name);
+    eosio_assert(game_sgt.exists(), "token not found by this symbol_name");
+    st_game game = game_sgt.get();
+    require_auth(game.owner);
+
+    set_ref(name, ref, game.owner);
+}
+
+void tokendapppub::addreftowl(string name_str, account_name referrer) {
+    symbol_name name = _string_to_symbol_name(name_str.c_str());
+    tb_games game_sgt(_self, name);
+    eosio_assert(game_sgt.exists(), "token not found by this symbol_name");
+    st_game game = game_sgt.get();
+    require_auth(game.owner);
+
+    add_referrer_to_whitelist(name, referrer, game.owner);
+}
+
 void tokendapppub::receipt(account_name from, string type, asset in, asset out, asset fee) {
     require_auth(_self);
 }
@@ -389,7 +417,7 @@ extern "C" {
         if (code != receiver) return;
 
         switch (action) {
-            EOSIO_API(tokendapppub, (addtowl)(settrans)(setreferfee)(detail)(issue)(create)(reg)(receipt)(transfer)(sell)(consume)(destroy)(claim)(newtoken)(hellodapppub))
+            EOSIO_API(tokendapppub, (setref)(addreftowl)(addtowl)(settrans)(setreferfee)(detail)(issue)(create)(reg)(receipt)(transfer)(sell)(consume)(destroy)(claim)(newtoken)(hellodapppub))
         };
         eosio_exit(0);
     }

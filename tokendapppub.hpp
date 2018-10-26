@@ -45,6 +45,7 @@ public:
     void setreferfee(string name_str, uint64_t refer_fee);
     void settrans(string name_str, uint64_t trans);
     void addtowl(string name_str, account_name agent);
+    void setref(string name_str, uint64_t trans);
     void addreftowl(string name_str, account_name agent);
     // for eosio.token
     void create(account_name issuer, asset maximum_supply);
@@ -77,6 +78,44 @@ private:
         tb_whitelist whitelist(_self, name);
         auto itr = whitelist.find(agent);
         return itr != whitelist.end();
+    }
+
+    // @abi table refwl i64
+    struct refwh {
+        account_name referrer;
+        uint64_t primary_key() const {return referrer;}
+    };
+    typedef eosio::multi_index<N(refwl), refwh> tb_refwl;
+    
+    void add_referrer_to_whitelist(symbol_name name, account_name referrer, account_name payer) {
+        eosio_assert(is_account(referrer), "referrer account does not exist");
+        tb_refwl refwh(_self, name);
+        refwh.emplace(payer, [&](auto& rt){
+            rt.referrer = referrer;
+        });
+    }
+
+    bool check_referrer_in_whitelist(symbol_name name, account_name referrer) {
+        tb_refwl refwh(_self, name);
+        auto itr = refwh.find(referrer);
+        return itr != refwh.end();
+    }
+
+    // @abi table openref i64
+    struct st_ref {
+        uint64_t ref;
+        bool opened() {
+            return ref == 1;
+        }
+    };
+    typedef singleton<N(openref), st_ref> tb_ref;
+
+    void set_ref(symbol_name name, uint64_t ref, account_name payer) {
+        eosio_assert(ref == 0 || ref == 1, "ref should be bool");
+        tb_ref ref_sgt(_self, name);
+        ref_sgt.set(st_ref{
+            .ref = ref,
+        }, payer);
     }
 
     // @abi table stat i64
@@ -430,5 +469,5 @@ private:
 };
 
 #ifdef ABIGEN
-    EOSIO_ABI(tokendapppub, (addtowl)(settrans)(setreferfee)(detail)(issue)(create)(reg)(receipt)(transfer)(sell)(consume)(destroy)(claim)(newtoken)(hellodapppub))
+    EOSIO_ABI(tokendapppub, (setref)(addreftowl)(addtowl)(settrans)(setreferfee)(detail)(issue)(create)(reg)(receipt)(transfer)(sell)(consume)(destroy)(claim)(newtoken)(hellodapppub))
 #endif
