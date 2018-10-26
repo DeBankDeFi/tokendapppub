@@ -45,6 +45,7 @@ public:
     void setreferfee(string name_str, uint64_t refer_fee);
     void settrans(string name_str, uint64_t trans);
     void addtowl(string name_str, account_name agent);
+    void addreftowl(string name_str, account_name agent);
     // for eosio.token
     void create(account_name issuer, asset maximum_supply);
     void issue(account_name to, asset quantity, string memo);
