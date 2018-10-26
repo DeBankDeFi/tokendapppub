@@ -72,7 +72,7 @@ private:
         });
     }
 
-    bool checkinwl(symbol_name name, account_name agent) {
+    bool check_in_whitelist(symbol_name name, account_name agent) {
         tb_whitelist whitelist(_self, name);
         auto itr = whitelist.find(agent);
         return itr != whitelist.end();

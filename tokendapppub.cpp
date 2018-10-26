@@ -262,7 +262,7 @@ void tokendapppub::transfer(account_name from, account_name to, asset quantity, 
 
     tb_trans trans_sgt(_self, sym);
     if (trans_sgt.exists() && !trans_sgt.get().transactable()) {
-        eosio_assert(checkinwl(sym, from) || checkinwl(sym, to), "should only transfer token with account in the whitelist");
+        eosio_assert(check_in_whitelist(sym, from) || check_in_whitelist(sym, to), "should only transfer token with account in the whitelist");
     }
 
     require_recipient( from );
