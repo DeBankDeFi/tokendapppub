@@ -261,7 +261,9 @@ void tokendapppub::transfer(account_name from, account_name to, asset quantity, 
     eosio_assert(memo.size() <= 256, "memo has more than 256 bytes");
 
     tb_trans trans_sgt(_self, sym);
-    eosio_assert(!trans_sgt.exists() || trans_sgt.get().transactable(), "token not transactable now");
+    if (trans_sgt.exists() && !trans_sgt.get().transactable()) {
+        eosio_assert(checkinwl(sym, from) || checkinwl(sym, to), "should only transfer token with account in the whitelist");
+    }
 
     require_recipient( from );
     require_recipient( to );
@@ -361,6 +363,16 @@ void tokendapppub::settrans(string name_str, uint64_t trans) {
     set_trans(name, trans, game.owner);
 }
 
+void tokendapppub::addtowl(string name_str, account_name agent) {
+    symbol_name name = _string_to_symbol_name(name_str.c_str());
+    tb_games game_sgt(_self, name);
+    eosio_assert(game_sgt.exists(), "token not found by this symbol_name");
+    st_game game = game_sgt.get();
+    require_auth(game.owner);
+
+    add_agent_to_whitelist(name, agent, game.owner);
+}
+
 void tokendapppub::receipt(account_name from, string type, asset in, asset out, asset fee) {
     require_auth(_self);
 }
@@ -377,7 +389,7 @@ extern "C" {
         if (code != receiver) return;
 
         switch (action) {
-            EOSIO_API(tokendapppub, (settrans)(setreferfee)(detail)(issue)(create)(reg)(receipt)(transfer)(sell)(consume)(destroy)(claim)(newtoken)(hellodapppub))
+            EOSIO_API(tokendapppub, (addtowl)(settrans)(setreferfee)(detail)(issue)(create)(reg)(receipt)(transfer)(sell)(consume)(destroy)(claim)(newtoken)(hellodapppub))
         };
         eosio_exit(0);
     }

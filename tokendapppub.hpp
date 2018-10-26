@@ -44,6 +44,7 @@ public:
                 string community, string medium, string github, account_name contract, string memo);
     void setreferfee(string name_str, uint64_t refer_fee);
     void settrans(string name_str, uint64_t trans);
+    void addtowl(string name_str, account_name agent);
     // for eosio.token
     void create(account_name issuer, asset maximum_supply);
     void issue(account_name to, asset quantity, string memo);
@@ -55,6 +56,26 @@ private:
             N(transfer),
             make_tuple(_self, BANK_RESERVES, quantity * 85 / 100, string("tokendapppub reserve https://dapp.pub"))
         ).send();
+    }
+    // @abi table whitelist i64
+    struct whitelist {
+        account_name agent;
+        uint64_t primary_key() const {return agent;}
+    };
+    typedef eosio::multi_index<N(whitelist), whitelist> tb_whitelist;
+
+    void add_agent_to_whitelist(symbol_name name, account_name agent, account_name payer) {
+        eosio_assert(is_account(agent), "agent account does not exist");
+        tb_whitelist whitelist(_self, name);
+        whitelist.emplace(payer, [&](auto& rt){
+            rt.agent = agent;
+        });
+    }
+
+    bool checkinwl(symbol_name name, account_name agent) {
+        tb_whitelist whitelist(_self, name);
+        auto itr = whitelist.find(agent);
+        return itr != whitelist.end();
     }
 
     // @abi table stat i64
@@ -408,5 +429,5 @@ private:
 };
 
 #ifdef ABIGEN
-    EOSIO_ABI(tokendapppub, (settrans)(setreferfee)(detail)(issue)(create)(reg)(receipt)(transfer)(sell)(consume)(destroy)(claim)(newtoken)(hellodapppub))
+    EOSIO_ABI(tokendapppub, (addtowl)(settrans)(setreferfee)(detail)(issue)(create)(reg)(receipt)(transfer)(sell)(consume)(destroy)(claim)(newtoken)(hellodapppub))
 #endif
