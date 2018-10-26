@@ -191,7 +191,7 @@ void tokendapppub::sell(account_name from, asset quantity) {
             make_tuple(_self, from, eos_quantity, string("tokendapppub withdraw https://dapp.pub"))
     ).send();
 
-    from_player.modify(player_itr, from, [&](auto& rt){
+    from_player.modify(player_itr, 0, [&](auto& rt){
         rt.balance -= quantity;
     });
 
@@ -217,7 +217,7 @@ void tokendapppub::consume(account_name from, asset quantity, string memo) {
 
     game_consume(quantity.symbol.name(), quantity.amount);
 
-    from_player.modify(player_itr, from, [&](auto& rt){
+    from_player.modify(player_itr, 0, [&](auto& rt){
         rt.balance -= quantity;
     });
 
@@ -242,7 +242,7 @@ void tokendapppub::claim(string name_str, bool sell) {
             rt.balance = stake_quantity;
         });
     } else {
-        from_player.modify(player_itr, game.owner, [&](auto& rt){
+        from_player.modify(player_itr, 0, [&](auto& rt){
             rt.balance += stake_quantity;
         });
     }
@@ -280,7 +280,7 @@ void tokendapppub::transfer(account_name from, account_name to, asset quantity, 
     auto player_itr = from_player.find(quantity.symbol.name());
     eosio_assert(player_itr != from_player.end(), "no balance object found by from account");
     eosio_assert(player_itr->balance.amount >= quantity.amount, "overdrawn balance" );
-    from_player.modify(player_itr, from, [&](auto& rt){
+    from_player.modify(player_itr, 0, [&](auto& rt){
         rt.balance -= quantity;
     });
 
@@ -295,7 +295,7 @@ void tokendapppub::transfer(account_name from, account_name to, asset quantity, 
             rt.balance = quantity;
         });
     } else {
-        to_player.modify(to_player_itr, from, [&](auto& rt){
+        to_player.modify(to_player_itr, 0, [&](auto& rt){
             rt.balance += quantity;
         });
     }
