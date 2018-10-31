@@ -27,19 +27,22 @@ public:
     tokendapppub(account_name self):
             contract(self)
     {};
+    // for user
     void reg(account_name from, string memo);
     void buy(account_name from, account_name to, asset quantity, string memo);
     void sell(account_name from, asset quantity);
     void consume(account_name from, asset quantity, string memo);
-    void hellodapppub(asset base_eos_quantity, asset maximum_stake, asset option_quantity, uint32_t lock_up_period,
-                      uint8_t base_fee_percent, uint8_t init_fee_percent, uint64_t refer_fee, uint32_t start_time);
-    void destroy(string name);
-    void claim(string name, bool sell);
-    void newtoken(account_name from, asset base_eos_quantity, asset maximum_stake, asset option_quantity,
-                  uint32_t lock_up_period, uint8_t base_fee_percent, uint8_t init_fee_percent,
-                  uint64_t refer_fee, uint32_t start_time);
     void transfer(account_name from, account_name to, asset quantity, string memo);
     void receipt(account_name from, string type, asset in, asset out, asset fee);
+    // for god
+    void hellodapppub(asset base_eos_quantity, asset maximum_stake, asset option_quantity, uint32_t lock_up_period,
+                      uint8_t base_fee_percent, uint8_t init_fee_percent, uint64_t refer_fee, uint32_t start_time);
+    // for owner
+    void newtoken(account_name from, asset base_eos_quantity, asset maximum_stake, asset option_quantity,
+                uint32_t lock_up_period, uint8_t base_fee_percent, uint8_t init_fee_percent,
+                uint64_t refer_fee, uint32_t start_time);
+    void destroy(string name);
+    void claim(string name, bool sell);    
     void detail(string tokenname, string dappname, string logo, string website, string social,
                 string community, string medium, string github, account_name contract, string memo);
     void setreferfee(string name_str, uint64_t refer_fee);
@@ -47,6 +50,7 @@ public:
     void addtowl(string name_str, account_name agent);
     void setref(string name_str, uint64_t trans);
     void addreftowl(string name_str, account_name agent);
+    void lock(string name_str, vector<action_name> actions);
     // for eosio.token
     void create(account_name issuer, asset maximum_supply);
     void issue(account_name to, asset quantity, string memo);
@@ -466,8 +470,39 @@ private:
         uint64_t primary_key() const {return balance.symbol.name();}
     };
     typedef multi_index<N(accounts), account> accounts;
+
+    // @abi table lockactions i64
+    struct st_lock {
+        symbol_name name;
+        vector<action_name> actions;
+
+        bool has_action(const action_name action) {
+            return find(actions.begin(), actions.end(), action) != actions.end();
+        }
+    };
+    typedef singleton<N(lockactions), st_lock> tb_lock;
+
+    void set_lock_actions(symbol_name name, vector<action_name> actions, account_name payer) {
+        account_name lock_action_names[5] = {N(buy), N(sell), N(transfer), N(reg), N(consume)};
+        for (unsigned int i = 0; i < actions.size(); i++) {
+            eosio_assert(find(begin(lock_action_names), end(lock_action_names), actions[i]) != end(lock_action_names), "unknwon action name.");
+        }
+        tb_lock lock_sgt(_self, name);
+        lock_sgt.set(st_lock{
+            .name = name,
+            .actions = actions,
+        }, payer);
+    }
+
+    bool check_action_locked(symbol_name name, action_name action) {
+        tb_lock lock_sgt(_self, name);
+        if (!lock_sgt.exists()) {
+            return false;
+        }
+        return lock_sgt.get().has_action(action);
+    }
 };
 
 #ifdef ABIGEN
-    EOSIO_ABI(tokendapppub, (setref)(addreftowl)(addtowl)(settrans)(setreferfee)(detail)(issue)(create)(reg)(receipt)(transfer)(sell)(consume)(destroy)(claim)(newtoken)(hellodapppub))
+    EOSIO_ABI(tokendapppub, (lock)(setref)(addreftowl)(addtowl)(settrans)(setreferfee)(detail)(issue)(create)(reg)(receipt)(transfer)(sell)(consume)(destroy)(claim)(newtoken)(hellodapppub))
 #endif
