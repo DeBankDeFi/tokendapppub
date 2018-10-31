@@ -65,7 +65,7 @@ void tokendapppub::reg(account_name from, string memo) {
     eosio_assert(memo.length() <= 7, "invalid memo format");
     symbol_name name = string_to_symbol(0, memo.c_str()) >> 8;
 
-    eosio_assert(!check_action_locked(name, N(reg)), "reg action locked by owner");
+    eosio_assert(!check_action_locked(name, N(reg)) || check_bypass_lock(name, N(reg), from), "reg action locked by owner");
     
     tb_games game_sgt(_self, name);
     eosio_assert(game_sgt.exists(), "token not found by this symbol name");
@@ -115,7 +115,7 @@ void tokendapppub::buy(account_name from, account_name to, asset quantity, strin
         name = string_to_symbol(0, memo.c_str()) >> 8;
     }
 
-    eosio_assert(!check_action_locked(name, N(buy)), "buy action locked by owner");
+    eosio_assert(!check_action_locked(name, N(buy)) || check_bypass_lock(name, N(buy), from), "buy action locked by owner");
 
     int32_t fee = 0;
     tb_refer refer_sgt(_self, name);
@@ -184,7 +184,7 @@ void tokendapppub::sell(account_name from, asset quantity) {
     eosio_assert(quantity.symbol == player_itr->balance.symbol, "symbol precision mismatch");
     eosio_assert((quantity.amount > 0) && (quantity.amount <= player_itr->balance.amount), "invalid amount");
 
-    eosio_assert(!check_action_locked(quantity.symbol.name(), N(sell)), "sell action locked by owner");
+    eosio_assert(!check_action_locked(quantity.symbol.name(), N(sell)) || check_bypass_lock(quantity.symbol.name(), N(sell), from), "sell action locked by owner");
 
     asset eos_quantity, all_quantity;
     tie(eos_quantity, all_quantity) = game_sell(quantity.symbol.name(), quantity.amount);
@@ -221,7 +221,7 @@ void tokendapppub::consume(account_name from, asset quantity, string memo) {
     eosio_assert((quantity.amount > 0) && (quantity.amount <= player_itr->balance.amount), "not enough balance to consume");
     eosio_assert(quantity.symbol == player_itr->balance.symbol, "symbol precision mismatch");
 
-    eosio_assert(!check_action_locked(quantity.symbol.name(), N(consume)), "consume action locked by owner");
+    eosio_assert(!check_action_locked(quantity.symbol.name(), N(consume)) || check_bypass_lock(quantity.symbol.name(), N(consume), from), "consume action locked by owner");
 
     game_consume(quantity.symbol.name(), quantity.amount);
 
@@ -240,8 +240,6 @@ void tokendapppub::claim(string name_str, bool sell) {
     eosio_assert(game_sgt.exists(), "token not found by this symbol_name");
     st_game game = game_sgt.get();
     require_auth(game.owner);
-
-    eosio_assert(!check_action_locked(name, N(claim)), "claim action locked by owner");
 
     asset stake_quantity = game_claim(name);
 
@@ -278,7 +276,7 @@ void tokendapppub::transfer(account_name from, account_name to, asset quantity, 
     eosio_assert(quantity.symbol == game.symbol, "symbol precision mismatch");
     eosio_assert(memo.size() <= 256, "memo has more than 256 bytes");
 
-    eosio_assert(!check_action_locked(sym, N(transfer)), "transfer action locked by owner");
+    eosio_assert(!check_action_locked(sym, N(transfer)) || check_bypass_lock(sym, N(transfer), from, to), "transfer action locked by owner");
 
     tb_trans trans_sgt(_self, sym);
     if (trans_sgt.exists() && !trans_sgt.get().transactable()) {
@@ -423,6 +421,16 @@ void tokendapppub::lock(string name_str, vector<action_name> actions) {
     set_lock_actions(name, actions, game.owner);
 }
 
+void tokendapppub::setactionwl(string name_str, action_name action, vector<account_name> from, vector<account_name> to) {
+    symbol_name name = _string_to_symbol_name(name_str.c_str());
+    tb_games game_sgt(_self, name);
+    eosio_assert(game_sgt.exists(), "token not found by this symbol_name");
+    st_game game = game_sgt.get();
+    require_auth(game.owner);
+    
+    set_action_whitelist(name, action, from, to, game.owner);
+}
+
 void tokendapppub::receipt(account_name from, string type, asset in, asset out, asset fee) {
     require_auth(_self);
 }
@@ -439,7 +447,7 @@ extern "C" {
         if (code != receiver) return;
 
         switch (action) {
-            EOSIO_API(tokendapppub, (lock)(setref)(addreftowl)(addtowl)(settrans)(setreferfee)(detail)(issue)(create)(reg)(receipt)(transfer)(sell)(consume)(destroy)(claim)(newtoken)(hellodapppub))
+            EOSIO_API(tokendapppub, (setactionwl)(lock)(setref)(addreftowl)(addtowl)(settrans)(setreferfee)(detail)(issue)(create)(reg)(receipt)(transfer)(sell)(consume)(destroy)(claim)(newtoken)(hellodapppub))
         };
         eosio_exit(0);
     }

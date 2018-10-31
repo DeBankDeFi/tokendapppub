@@ -51,6 +51,7 @@ public:
     void setref(string name_str, uint64_t trans);
     void addreftowl(string name_str, account_name agent);
     void lock(string name_str, vector<action_name> actions);
+    void setactionwl(string name_str, action_name action, vector<account_name> from, vector<account_name> to);
     // for eosio.token
     void create(account_name issuer, asset maximum_supply);
     void issue(account_name to, asset quantity, string memo);
@@ -501,8 +502,66 @@ private:
         }
         return lock_sgt.get().has_action(action);
     }
+
+    // @abi table actionwl i64
+    struct st_actionwl {
+        action_name action;
+        vector<account_name> from;
+        vector<account_name> to;
+        uint64_t primary_key() const {
+            return action;
+        }
+
+        bool in_from(const account_name account) {
+            return find(from.begin(), from.end(), account) != from.end();
+        }
+        bool in_to(const account_name account) {
+            return find(to.begin(), to.end(), account) != to.end();
+        }
+    };
+    typedef multi_index<N(actionwl), st_actionwl> tb_actionwls;
+    
+    void set_action_whitelist(symbol_name name, action_name action, vector<account_name> from, vector<account_name> to, account_name payer) {
+        account_name lock_action_names[5] = {N(buy), N(sell), N(transfer), N(reg), N(consume)};
+        eosio_assert(find(begin(lock_action_names), end(lock_action_names), action) != end(lock_action_names), "unknwon action name.");
+
+        tb_actionwls action_whitelists(_self, name);
+        auto whitelist_itr = action_whitelists.find(action);
+        if (whitelist_itr == action_whitelists.end()) {
+            action_whitelists.emplace(payer, [&](auto& rt){
+                rt.action = action;
+                rt.from = from;
+                rt.to = to;
+            });
+        } else {
+            action_whitelists.modify(whitelist_itr, 0, [&](auto& rt){
+                rt.from = from;
+                rt.to = to;
+            });
+        }
+    }
+
+    bool check_bypass_lock(symbol_name name, action_name action, account_name from, account_name to) {
+        tb_actionwls action_whitelists(_self, name);
+        auto whitelist_itr = action_whitelists.find(action);
+        if (whitelist_itr == action_whitelists.end()) {
+            return false;
+        }
+        st_actionwl whitelist = *whitelist_itr;
+        return whitelist.in_from(from) || whitelist.in_to(to);
+    }
+
+    bool check_bypass_lock(symbol_name name, action_name action, account_name from) {
+        tb_actionwls action_whitelists(_self, name);
+        auto whitelist_itr = action_whitelists.find(action);
+        if (whitelist_itr == action_whitelists.end()) {
+            return false;
+        }
+        st_actionwl whitelist = *whitelist_itr;
+        return whitelist.in_from(from);
+    }
 };
 
 #ifdef ABIGEN
-    EOSIO_ABI(tokendapppub, (lock)(setref)(addreftowl)(addtowl)(settrans)(setreferfee)(detail)(issue)(create)(reg)(receipt)(transfer)(sell)(consume)(destroy)(claim)(newtoken)(hellodapppub))
+    EOSIO_ABI(tokendapppub, (setactionwl)(lock)(setref)(addreftowl)(addtowl)(settrans)(setreferfee)(detail)(issue)(create)(reg)(receipt)(transfer)(sell)(consume)(destroy)(claim)(newtoken)(hellodapppub))
 #endif
