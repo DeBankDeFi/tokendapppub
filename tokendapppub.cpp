@@ -80,7 +80,7 @@ void tokendapppub::reg(account_name from, string memo) {
 }
 
 void tokendapppub::buy(account_name from, account_name to, asset quantity, string memo) {
-    if ((from == _self) || (to != _self) || (from == BANK_RESERVES)) {
+    if ((from == _self) || (to != _self) || (from == BANK_RESERVES) || (from == IBANK_ACCOUNT)) {
         return;
     }
     eosio_assert(quantity.symbol == CORE_SYMBOL, "must pay with CORE token");
@@ -95,7 +95,6 @@ void tokendapppub::buy(account_name from, account_name to, asset quantity, strin
 
         game_profit(name, quantity.amount);
 
-        reserve(quantity);
         return;
     }
 
@@ -165,8 +164,6 @@ void tokendapppub::buy(account_name from, account_name to, asset quantity, strin
             rt.balance += stake_quantity;
         });
     }
-
-    reserve(quantity-asset(fee));
 
     action(
             permission_level{_self, N(active)},
