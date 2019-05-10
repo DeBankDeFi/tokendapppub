@@ -6,7 +6,6 @@
 #include <eosiolib/time.hpp>
 #include <eosiolib/singleton.hpp>
 #include <eosiolib/transaction.hpp>
-#include <eosiolib/currency.hpp>
 
 #include <math.h>
 
@@ -53,6 +52,7 @@ public:
     void addreftowl(string name_str, account_name agent);
     void lock(string name_str, vector<action_name> actions);
     void setactionwl(string name_str, action_name action, vector<account_name> from, vector<account_name> to);
+    void setsellfee(string name_str, uint64_t base_fee_percent, uint64_t init_fee_percent);
     // for eosio.token
     void create(account_name issuer, asset maximum_supply);
     void issue(account_name to, asset quantity, string memo);
@@ -556,5 +556,5 @@ private:
 };
 
 #ifdef ABIGEN
-    EOSIO_ABI(tokendapppub, (setactionwl)(lock)(setref)(addreftowl)(addtowl)(settrans)(setreferfee)(detail)(issue)(create)(reg)(receipt)(transfer)(sell)(consume)(destroy)(claim)(newtoken)(hellodapppub))
+    EOSIO_ABI(tokendapppub, (setactionwl)(lock)(setref)(addreftowl)(addtowl)(settrans)(setreferfee)(detail)(issue)(create)(reg)(receipt)(transfer)(sell)(consume)(destroy)(claim)(newtoken)(hellodapppub)(setsellfee))
 #endif
