@@ -378,6 +378,19 @@ void tokendapppub::settrans(string name_str, uint64_t trans) {
     set_trans(name, trans, game.owner);
 }
 
+void tokendapppub::setsellfee(string name_str, uint64_t base_fee_percent, uint64_t init_fee_percent) {
+    symbol_name name = _string_to_symbol_name(name_str.c_str());
+    tb_games game_sgt(_self, name);
+    eosio_assert(game_sgt.exists(), "token not found by this symbol_name");
+    st_game game = game_sgt.get();
+    require_auth(game.owner);
+    eosio_assert((base_fee_percent >= 0) && (base_fee_percent <= 99), "invalid fee percent");
+    eosio_assert((init_fee_percent >= base_fee_percent) && (init_fee_percent <=99), "invalid init fee percent");
+    game.base_fee_percent = base_fee_percent;
+    game.init_fee_percent = init_fee_percent;
+    game_sgt.set(game, game.owner);
+}
+
 void tokendapppub::addtowl(string name_str, account_name agent) {
     symbol_name name = _string_to_symbol_name(name_str.c_str());
     tb_games game_sgt(_self, name);
